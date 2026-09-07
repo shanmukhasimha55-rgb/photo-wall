@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Photo Wall</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #0d0f14;
+      color: #f0f0f5;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: rgba(13, 15, 20, 0.85);
+      backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 14px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .logo {
+      font-size: 1.4rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo span {
+      background: linear-gradient(135deg, #ff416c, #ff4b2b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .btn-action {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #fff;
+      padding: 9px 16px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      text-decoration: none;
+    }
+
+    .btn-action:hover {
+      background: rgba(255, 255, 255, 0.14);
+      transform: translateY(-2px);
+    }
+
+    .btn-danger {
+      background: rgba(255, 65, 108, 0.2);
+      border: 1px solid rgba(255, 65, 108, 0.5);
+      color: #ff6b6b;
+      padding: 7px 14px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .btn-danger:hover {
+      background: rgba(255, 65, 108, 0.4);
+      transform: scale(1.05);
+      box-shadow: 0 4px 15px rgba(255, 65, 108, 0.4);
+    }
+
+    main {
+      flex: 1;
+      padding: 28px;
+      max-width: 1280px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Login View */
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 70vh;
+    }
+
+    .login-card {
+      background: rgba(24, 27, 36, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 38px 32px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 16px 50px rgba(0, 0, 0, 0.6);
+      text-align: center;
+    }
+
+    .login-card h2 {
+      font-size: 1.6rem;
+      margin-bottom: 8px;
+    }
+
+    .login-card p {
+      font-size: 0.85rem;
+      color: #8a8f9d;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #c0c4d0;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+      border-color: #ff4b2b;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, #ff416c, #ff4b2b);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: opacity 0.2s ease;
+    }
+
+    .btn-submit:hover {
+      opacity: 0.95;
+    }
+
+    .error-msg {
+      margin-top: 14px;
+      color: #ff6b6b;
+      font-size: 0.85rem;
+      display: none;
+    }
+
+    /* Dashboard View */
+    .dashboard-view {
+      display: none;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: rgba(24, 27, 36, 0.8);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      transition: transform 0.25s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .stat-icon {
+      font-size: 2.4rem;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 12px;
+      border-radius: 14px;
+    }
+
+    .stat-info h4 {
+      font-size: 0.85rem;
+      color: #8a8f9d;
+      margin-bottom: 4px;
+    }
+
+    .stat-info .num {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .table-card {
+      background: rgba(24, 27, 36, 0.8);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .table-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      padding: 12px 16px;
+      font-size: 0.8rem;
+      color: #8a8f9d;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    td {
+      padding: 14px 16px;
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      vertical-align: middle;
+      transition: background 0.2s ease;
+    }
+
+    tr {
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    tr.deleting {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+
+    .thumb-preview {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      object-fit: cover;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .thumb-preview:hover {
+      transform: scale(1.1);
+    }
+
+    .badge-room {
+      background: rgba(75, 150, 255, 0.15);
+      color: #6bb0ff;
+      border: 1px solid rgba(75, 150, 255, 0.3);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+    }
+
+    /* Custom Circular Checkbox */
+    input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.05);
+      outline: none;
+      cursor: pointer;
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
+
+    input[type="checkbox"]:hover {
+      border-color: #ff4b2b;
+      box-shadow: 0 0 10px rgba(255, 75, 43, 0.4);
+      transform: scale(1.1);
+    }
+
+    input[type="checkbox"]:checked {
+      background: linear-gradient(135deg, #ff416c, #ff4b2b);
+      border-color: transparent;
+      box-shadow: 0 0 12px rgba(255, 65, 108, 0.6);
+    }
+
+    input[type="checkbox"]:checked::after {
+      content: '';
+      width: 5px;
+      height: 9px;
+      border: solid #ffffff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+      margin-bottom: 2px;
+    }
+
+    input[type="checkbox"]:indeterminate {
+      background: rgba(255, 65, 108, 0.35);
+      border-color: #ff4b2b;
+    }
+
+    input[type="checkbox"]:indeterminate::after {
+      content: '';
+      width: 8px;
+      height: 2px;
+      background: #ffffff;
+      border-radius: 1px;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(40px);
+      background: rgba(30, 34, 48, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1000;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      🛡️ <span>Photo Wall Admin</span>
+    </div>
+    <div id="adminHeaderActions" style="display: none;">
+      <button class="btn-action" onclick="logoutAdmin()">Logout (simha_admin)</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Login View -->
+    <div id="loginView" class="login-container">
+      <div class="login-card">
+        <h2>Admin Sign In</h2>
+        <p>Enter credentials to access photo moderation and analytics.</p>
+
+        <form onsubmit="handleAdminLogin(event)">
+          <div class="form-group">
+            <label for="adminUsername">Username</label>
+            <input type="text" id="adminUsername" placeholder="Enter username" required>
+          </div>
+          <div class="form-group">
+            <label for="adminPassword">Password</label>
+            <input type="password" id="adminPassword" placeholder="Enter password" required>
+          </div>
+          <button type="submit" class="btn-submit">Sign In to Dashboard</button>
+        </form>
+
+        <div id="loginError" class="error-msg"></div>
+      </div>
+    </div>
+
+    <!-- Dashboard View -->
+    <div id="dashboardView" class="dashboard-view">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">📷</div>
+          <div class="stat-info">
+            <h4>Total Photos</h4>
+            <div id="statTotalPhotos" class="num">0</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📁</div>
+          <div class="stat-info">
+            <h4>Active Rooms</h4>
+            <div id="statTotalRooms" class="num">0</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">❤️</div>
+          <div class="stat-info">
+            <h4>Total Likes</h4>
+            <div id="statTotalLikes" class="num">0</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">💾</div>
+          <div class="stat-info">
+            <h4>Storage Used</h4>
+            <div id="statStorageMB" class="num">0 MB</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <h3>Photo Moderation & Management</h3>
+          <div class="table-controls">
+            <input type="text" id="adminSearchInput" class="filter-input" placeholder="🔍 Search photos..." oninput="filterAdminTable()">
+            <button id="btnSelectAllToggle" class="btn-action" onclick="toggleSelectAllBtn()">Select All</button>
+            <button id="btnBatchDelete" class="btn-danger" style="display: none;" onclick="deleteSelectedPhotos()">🗑️ Delete Selected (<span id="selectedCount">0</span>)</button>
+            <button class="btn-action" onclick="loadAdminStats()">🔄 Refresh</button>
+          </div>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 120px;">
+                  <label for="selectAll" style="cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-weight: 700;">
+                    <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)">
+                    <span>ALL</span>
+                  </label>
+                </th>
+                <th>Preview</th>
+                <th>Photo ID</th>
+                <th>Caption</th>
+                <th>Location</th>
+                <th>Room ID</th>
+                <th>Likes</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="photosTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const loginView = document.getElementById('loginView');
+    const dashboardView = document.getElementById('dashboardView');
+    const adminHeaderActions = document.getElementById('adminHeaderActions');
+    const loginError = document.getElementById('loginError');
+    const toast = document.getElementById('toast');
+
+    let allAdminPhotos = [];
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    async function handleAdminLogin(event) {
+      event.preventDefault();
+      const username = document.getElementById('adminUsername').value.trim();
+      const password = document.getElementById('adminPassword').value.trim();
+
+      loginError.style.display = 'none';
+
+      try {
+        const res = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (res.ok && data.ok) {
+          showDashboard();
+        } else {
+          loginError.textContent = data.error || 'Invalid credentials.';
+          loginError.style.display = 'block';
+        }
+      } catch (err) {
+        loginError.textContent = 'Failed to authenticate.';
+        loginError.style.display = 'block';
+      }
+    }
+
+    async function logoutAdmin() {
+      await fetch('/api/admin/logout', { method: 'POST' });
+      loginView.style.display = 'flex';
+      dashboardView.style.display = 'none';
+      adminHeaderActions.style.display = 'none';
+    }
+
+    async function showDashboard() {
+      loginView.style.display = 'none';
+      dashboardView.style.display = 'block';
+      adminHeaderActions.style.display = 'block';
+      await loadAdminStats();
+    }
+
+    async function loadAdminStats() {
+      try {
+        const res = await fetch('/api/admin/stats');
+        if (res.status === 401) {
+          loginView.style.display = 'flex';
+          dashboardView.style.display = 'none';
+          adminHeaderActions.style.display = 'none';
+          return;
+        }
+        const data = await res.json();
+        if (!res.ok) return;
+
+        document.getElementById('statTotalPhotos').textContent = data.totalPhotos || 0;
+        document.getElementById('statTotalRooms').textContent = data.totalRooms || 0;
+        document.getElementById('statTotalLikes').textContent = data.totalLikes || 0;
+        document.getElementById('statStorageMB').textContent = `${data.totalStorageMB || 0} MB`;
+
+        allAdminPhotos = data.photos || [];
+        filterAdminTable();
+      } catch (err) {
+        console.error('Failed to load admin stats:', err);
+      }
+    }
+
+    function filterAdminTable() {
+      const q = document.getElementById('adminSearchInput').value.trim().toLowerCase();
+      const filtered = allAdminPhotos.filter(p => 
+        (p.caption && p.caption.toLowerCase().includes(q)) ||
+        (p.location && p.location.toLowerCase().includes(q)) ||
+        (p.roomId && p.roomId.toLowerCase().includes(q)) ||
+        (p.id && p.id.toLowerCase().includes(q))
+      );
+      renderPhotosTable(filtered);
+    }
+
+    function renderPhotosTable(photos) {
+      const tbody = document.getElementById('photosTableBody');
+      tbody.innerHTML = '';
+
+      if (!photos.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #8a8f9d; padding: 24px;">No photos found.</td></tr>';
+        updateBatchDeleteBtn();
+        return;
+      }
+
+      photos.forEach(photo => {
+        const tr = document.createElement('tr');
+        tr.id = `row-${photo.id}`;
+        tr.innerHTML = `
+          <td><input type="checkbox" class="row-checkbox" value="${photo.id}" onchange="updateBatchDeleteBtn()"></td>
+          <td><a href="${photo.full}" target="_blank"><img src="${photo.thumb}" class="thumb-preview" alt="Thumb"></a></td>
+          <td style="font-family: monospace; font-size: 0.8rem; color: #a0a5b5;">${photo.id.substring(0, 12)}...</td>
+          <td>${photo.caption || '<em>None</em>'}</td>
+          <td>${photo.location ? '📍 ' + photo.location : '<em>None</em>'}</td>
+          <td><span class="badge-room">${photo.roomId}</span></td>
+          <td>❤️ ${photo.likes || 0}</td>
+          <td>
+            <button class="btn-danger" onclick="deleteSinglePhoto('${photo.id}')">🗑️ Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      updateBatchDeleteBtn();
+    }
+
+    function toggleSelectAll(master) {
+      const checkboxes = document.querySelectorAll('.row-checkbox');
+      checkboxes.forEach(cb => {
+        cb.checked = master.checked;
+      });
+      updateBatchDeleteBtn();
+    }
+
+    function toggleSelectAllBtn() {
+      const master = document.getElementById('selectAll');
+      const checkboxes = document.querySelectorAll('.row-checkbox');
+      const selected = getSelectedPhotoIds();
+      
+      const shouldCheck = (checkboxes.length > 0 && selected.length !== checkboxes.length);
+      if (master) master.checked = shouldCheck;
+      toggleSelectAll(master || { checked: shouldCheck });
+    }
+
+    function getSelectedPhotoIds() {
+      const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+      return Array.from(checkboxes).map(cb => cb.value);
+    }
+
+    function updateBatchDeleteBtn() {
+      const btn = document.getElementById('btnBatchDelete');
+      const master = document.getElementById('selectAll');
+      const toggleBtn = document.getElementById('btnSelectAllToggle');
+      const checkboxes = document.querySelectorAll('.row-checkbox');
+      const selected = getSelectedPhotoIds();
+
+      if (master) {
+        if (checkboxes.length > 0 && selected.length === checkboxes.length) {
+          master.checked = true;
+          master.indeterminate = false;
+        } else if (selected.length > 0) {
+          master.checked = false;
+          master.indeterminate = true;
+        } else {
+          master.checked = false;
+          master.indeterminate = false;
+        }
+      }
+
+      if (toggleBtn) {
+        if (checkboxes.length > 0 && selected.length === checkboxes.length) {
+          toggleBtn.textContent = 'Deselect All';
+        } else {
+          toggleBtn.textContent = 'Select All';
+        }
+      }
+
+      if (selected.length > 0) {
+        btn.style.display = 'inline-flex';
+        const isAllSelected = (checkboxes.length > 0 && selected.length === checkboxes.length);
+        const label = isAllSelected ? '🗑️ Delete All' : '🗑️ Delete Selected';
+        btn.innerHTML = `${label} (<span id="selectedCount">${selected.length}</span>)`;
+      } else {
+        btn.style.display = 'none';
+      }
+    }
+
+    async function deleteSinglePhoto(photoId) {
+      if (!confirm('Permanently delete this photo from S3?')) return;
+
+      const row = document.getElementById(`row-${photoId}`);
+      if (row) {
+        row.classList.add('deleting');
+        setTimeout(() => row.remove(), 250);
+      }
+      showToast('Photo deleted successfully! 🗑️');
+
+      try {
+        await fetch('/api/admin/delete-photo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ photoId })
+        });
+        loadAdminStats();
+      } catch (err) {
+        showToast('Error deleting photo.');
+      }
+    }
+
+    async function deleteSelectedPhotos() {
+      const photoIds = getSelectedPhotoIds();
+      if (!photoIds.length) {
+        showToast('Please select at least one photo to delete.');
+        return;
+      }
+
+      if (!confirm(`Permanently delete ${photoIds.length} selected photos from S3?`)) return;
+
+      // Optimistic instant UI removal
+      photoIds.forEach(id => {
+        const row = document.getElementById(`row-${id}`);
+        if (row) {
+          row.classList.add('deleting');
+          setTimeout(() => row.remove(), 250);
+        }
+      });
+      showToast(`${photoIds.length} photos deleted successfully! 🗑️`);
+
+      try {
+        const res = await fetch('/api/admin/delete-batch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ photoIds })
+        });
+        if (res.ok) {
+          loadAdminStats();
+        } else {
+          showToast('Failed to delete batch photos.');
+        }
+      } catch (err) {
+        showToast('Error deleting batch photos.');
+      }
+    }
+
+    loadAdminStats();
+  </script>
+</body>
+</html>

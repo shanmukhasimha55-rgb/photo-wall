@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  photo-wall:
+    build: .
+    container_name: photo-wall-app
+    restart: always
+    ports:
+      - "80:5000"
+    environment:
+      - BUCKET_NAME=photo-wall-simha-p1
+      - AWS_REGION=ap-south-1
+      - ADMIN_USERNAME=simha_admin
+      - ADMIN_PASSWORD=Simha_Admin_Pass
+      - DYNAMODB_TABLE=PhotoWallMetadata
+      - CLOUDWATCH_LOG_GROUP=/aws/photowall/app
+      # Provide AWS keys or attach an IAM Role to your EC2 instance:
+      # - AWS_ACCESS_KEY_ID=your_key
+      # - AWS_SECRET_ACCESS_KEY=your_secret

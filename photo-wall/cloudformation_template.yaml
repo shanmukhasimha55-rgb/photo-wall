@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudFormation Template for Photo Wall Architecture (S3, DynamoDB, Lambda, IAM, CloudWatch)'
+
+Parameters:
+  BucketName:
+    Type: String
+    Default: 'photo-wall-simha-p1'
+    Description: 'S3 bucket name for photo wall uploads and thumbnails'
+
+Resources:
+  # 1. DynamoDB Table for Metadata & Analytics (Always Free Tier)
+  PhotoMetadataTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: PhotoWallMetadata
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PhotoId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PhotoId
+          KeyType: HASH
+      Tags:
+        - Key: Project
+          Value: PhotoWall
+
+  # 2. CloudWatch Log Group for App & Processing Logs
+  PhotoWallLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/photowall/app
+      RetentionInDays: 7
+
+  # 3. IAM Role for Lambda S3 & Rekognition Processing
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: PhotoWallLambdaExecutionRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: PhotoWallS3AndRekognitionPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                Resource: !Sub 'arn:aws:s3:::${BucketName}/*'
+              - Effect: Allow
+                Action:
+                  - rekognition:DetectLabels
+                  - rekognition:DetectModerationLabels
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:GetItem
+                  - dynamodb:UpdateItem
+                Resource: !GetAtt PhotoMetadataTable.Arn
+
+Outputs:
+  DynamoDBTableName:
+    Description: 'DynamoDB Table Name'
+    Value: !Ref PhotoMetadataTable
+  LogGroupName:
+    Description: 'CloudWatch Log Group'
+    Value: !Ref PhotoWallLogGroup
+  IAMRoleArn:
+    Description: 'Lambda IAM Execution Role ARN'
+    Value: !GetAtt LambdaExecutionRole.Arn
